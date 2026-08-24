@@ -1,3 +1,4 @@
+
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
@@ -17,25 +18,25 @@ function printLine() {
 }
 
 
-// Display test result
+// Test result
 function testResult(testName, condition) {
 
     if (condition) {
 
         console.log(testName + ": PASS");
-
         passed++;
 
     } else {
 
         console.log(testName + ": FAIL");
-
         failed++;
+
     }
+
 }
 
 
-// Send HTTP request
+// HTTP request
 function request(options) {
 
     return new Promise(function(resolve, reject) {
@@ -67,6 +68,7 @@ function request(options) {
         req.end();
 
     });
+
 }
 
 
@@ -108,12 +110,12 @@ function startServer() {
         });
 
 
-        // Give server time to start
         setTimeout(function() {
             resolve();
         }, 1500);
 
     });
+
 }
 
 
@@ -137,17 +139,40 @@ async function runTests() {
     printLine();
 
 
-    // Test 1
+    /*
+     * Read actual project files
+     */
+
+    const htmlFile = path.join(__dirname, "index.html");
+    const cssFile = path.join(__dirname, "style.css");
+    const jsFile = path.join(__dirname, "script.js");
+
+
+    const htmlContent = fs.readFileSync(
+        htmlFile,
+        "utf8"
+    );
+
+    const cssContent = fs.readFileSync(
+        cssFile,
+        "utf8"
+    );
+
+    const jsContent = fs.readFileSync(
+        jsFile,
+        "utf8"
+    );
+
+
+    /*
+     * Test 1
+     */
+
     const pageResponse = await request({
-
         hostname: "localhost",
-
         port: PORT,
-
         path: "/",
-
         method: "GET"
-
     });
 
 
@@ -157,24 +182,25 @@ async function runTests() {
     );
 
 
-    // Test 2
+    /*
+     * Test 2
+     */
+
     testResult(
-        "Test 2 - HTML content exists",
-        pageResponse.body.includes("Quiz App Portal")
+        "Test 2 - Quiz title exists",
+        htmlContent.includes("Quiz App Portal")
     );
 
 
-    // Test 3
+    /*
+     * Test 3
+     */
+
     const cssResponse = await request({
-
         hostname: "localhost",
-
         port: PORT,
-
         path: "/style.css",
-
         method: "GET"
-
     });
 
 
@@ -184,24 +210,25 @@ async function runTests() {
     );
 
 
-    // Test 4
+    /*
+     * Test 4
+     */
+
     testResult(
-        "Test 4 - CSS content exists",
-        cssResponse.body.includes("body")
+        "Test 4 - CSS body styling exists",
+        cssContent.includes("body")
     );
 
 
-    // Test 5
+    /*
+     * Test 5
+     */
+
     const jsResponse = await request({
-
         hostname: "localhost",
-
         port: PORT,
-
         path: "/script.js",
-
         method: "GET"
-
     });
 
 
@@ -211,40 +238,49 @@ async function runTests() {
     );
 
 
-    // Test 6
+    /*
+     * Test 6
+     */
+
     testResult(
-        "Test 6 - JavaScript contains questions",
-        jsResponse.body.includes("questions")
+        "Test 6 - Quiz questions exist",
+        jsContent.includes("const questions")
     );
 
 
-    // Test 7
+    /*
+     * Test 7
+     */
+
     testResult(
         "Test 7 - Start button exists",
-        pageResponse.body.includes("start-btn")
+        htmlContent.includes('id="start-btn"')
     );
 
 
-    // Test 8
+    /*
+     * Test 8
+     */
+
     testResult(
         "Test 8 - Next button exists",
-        pageResponse.body.includes("next-btn")
+        htmlContent.includes('id="next-btn"')
     );
 
 
-    // Test 9
+    /*
+     * Test 9
+     */
+
     testResult(
         "Test 9 - Result screen exists",
-        pageResponse.body.includes("result-screen")
+        htmlContent.includes('id="result-screen"')
     );
 
 
-    // Test 10
-    const htmlFile = path.join(
-        __dirname,
-        "index.html"
-    );
-
+    /*
+     * Test 10
+     */
 
     testResult(
         "Test 10 - index.html exists",
@@ -252,12 +288,9 @@ async function runTests() {
     );
 
 
-    // Test 11
-    const cssFile = path.join(
-        __dirname,
-        "style.css"
-    );
-
+    /*
+     * Test 11
+     */
 
     testResult(
         "Test 11 - style.css exists",
@@ -265,12 +298,9 @@ async function runTests() {
     );
 
 
-    // Test 12
-    const jsFile = path.join(
-        __dirname,
-        "script.js"
-    );
-
+    /*
+     * Test 12
+     */
 
     testResult(
         "Test 12 - script.js exists",
@@ -278,7 +308,9 @@ async function runTests() {
     );
 
 
-    // Final result
+    /*
+     * Final result
+     */
 
     printLine();
 
@@ -318,7 +350,9 @@ async function runTests() {
     stopServer();
 
 
-    // Exit code for Jenkins
+    /*
+     * Exit code for Jenkins
+     */
 
     if (failed > 0) {
 
@@ -333,7 +367,7 @@ async function runTests() {
 }
 
 
-// Main function
+// Main
 async function main() {
 
     try {
@@ -345,7 +379,6 @@ async function main() {
     } catch (error) {
 
         console.error("TEST ERROR:");
-
         console.error(error);
 
         stopServer();
@@ -358,3 +391,4 @@ async function main() {
 
 
 main();
+
