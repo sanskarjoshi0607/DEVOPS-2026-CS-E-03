@@ -2,11 +2,28 @@ pipeline {
     agent any
 
     stages {
-        stage('Build') {
+
+        stage('Checkout') {
             steps {
-                echo 'Quiz App Build Started'
-                echo 'Quiz App Build Successful'
+                checkout scm
             }
+        }
+
+        stage('Test') {
+            steps {
+                bat 'node test.js'
+            }
+        }
+
+    }
+
+    post {
+        success {
+            echo 'All Quiz App tests passed!'
+        }
+
+        failure {
+            echo 'Quiz App tests failed!'
         }
     }
 }
