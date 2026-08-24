@@ -3,27 +3,69 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        stage('Verify Files') {
             steps {
-                checkout scm
+                bat '''
+                echo ================================
+                echo WORKSPACE
+                echo ================================
+                cd
+
+                echo ================================
+                echo PROJECT FILES
+                echo ================================
+                dir
+
+                echo ================================
+                echo CHECKING REQUIRED FILES
+                echo ================================
+
+                if not exist index.html exit /b 1
+                if not exist style.css exit /b 1
+                if not exist script.js exit /b 1
+                if not exist server.js exit /b 1
+                if not exist test.js exit /b 1
+
+                echo All required files are present.
+                '''
             }
         }
 
-        stage('Test') {
+
+        stage('Run Tests') {
             steps {
-                bat 'node test.js'
+                bat '''
+                echo ================================
+                echo RUNNING QUIZ APP TESTS
+                echo ================================
+
+                node test.js
+                '''
             }
         }
 
     }
 
+
     post {
+
         success {
-            echo 'All Quiz App tests passed!'
+            echo '================================'
+            echo 'QUIZ APP TESTS PASSED'
+            echo 'JENKINS BUILD SUCCESSFUL'
+            echo '================================'
         }
 
         failure {
-            echo 'Quiz App tests failed!'
+            echo '================================'
+            echo 'QUIZ APP TESTS FAILED'
+            echo 'JENKINS BUILD FAILED'
+            echo '================================'
         }
+
+        always {
+            echo 'Jenkins Pipeline execution completed.'
+        }
+
     }
 }
