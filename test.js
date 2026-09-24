@@ -74,48 +74,42 @@ function request(options) {
 
 // Start server
 function startServer() {
-
     return new Promise(function(resolve, reject) {
 
-        serverProcess = spawn(
-            process.execPath,
-            ["server.js"],
-            {
-                cwd: __dirname,
-                stdio: ["ignore", "pipe", "pipe"]
-            }
-        );
+        serverProcess = spawn(process.execPath, ["server.js"], {
+            cwd: __dirname,
+            stdio: ["ignore", "pipe", "pipe"]
+        });
 
+        let serverStarted = false;
 
         serverProcess.stdout.on("data", function(data) {
+            const output = data.toString().trim();
 
-            console.log(
-                "Server: " + data.toString().trim()
-            );
+            console.log("Server: " + output);
 
+            if (output.includes("Server running on 5000")) {
+                serverStarted = true;
+                resolve();
+            }
         });
-
 
         serverProcess.stderr.on("data", function(data) {
-
-            console.error(
-                "Server Error: " + data.toString().trim()
-            );
-
+            console.error("Server Error: " + data.toString().trim());
         });
-
 
         serverProcess.on("error", function(error) {
             reject(error);
         });
 
-
-        setTimeout(function() {
-            resolve();
-        }, 1500);
-
+        serverProcess.on("exit", function(code) {
+            if (!serverStarted) {
+                reject(new Error(
+                    "Server exited before starting. Exit code: " + code
+                ));
+            }
+        });
     });
-
 }
 
 
@@ -264,7 +258,7 @@ async function runTests() {
 
     testResult(
         "Test 8 - Next button exists",
-        htmlContent.includes('id="next-btn"')
+        htmlContent.includes('id="nextt-btn"')
     );
 
 
