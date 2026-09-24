@@ -43,6 +43,17 @@ pipeline {
                 '''
             }
         }
+        stage('Install Dependencies') {
+    steps {
+        bat '''
+        echo ================================
+        echo INSTALLING NODE DEPENDENCIES
+        echo ================================
+
+        npm install
+        '''
+    }
+}
 
     }
      post {
