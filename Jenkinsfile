@@ -45,20 +45,7 @@ pipeline {
         }
 
     }
-    stage('Verify Docker') {
-    steps {
-        bat '''
-        echo ================================
-        echo CHECKING DOCKER
-        echo ================================
-        docker --version
-        docker info
-        '''
-    }
-}
-
-
-    post {
+     post {
 
         success {
             echo '================================'
