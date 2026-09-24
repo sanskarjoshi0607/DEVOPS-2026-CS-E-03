@@ -1,0 +1,28 @@
+{
+  "name": "devops-2026-cs-e-03",
+  "version": "1.0.0",
+  "description": "created quiz selection page",
+  "main": "models.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sanskarjoshi0607/DEVOPS-2026-CS-E-03.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/sanskarjoshi0607/DEVOPS-2026-CS-E-03/issues"
+  },
+  "homepage": "https://github.com/sanskarjoshi0607/DEVOPS-2026-CS-E-03#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.3",
+    "express": "^5.2.1",
+    "mongoose": "^9.10.2"
+  }
+}
