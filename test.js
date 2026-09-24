@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
 
-const PORT = 3000;
+const PORT = 5000;
 
 let serverProcess;
 
