@@ -2,8 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB, initMemoryStorage } from './config/db.js';
-import quizRoutes from './routes/quizRoutes.js';
-import authRoutes from './routes/authRoutes.js';
+import quizRoutes from './models/routes/quizRoutes.js';
+import authRoutes from './models/routes/authRoutes.js';
 
 // Load environment variables
 dotenv.config();
