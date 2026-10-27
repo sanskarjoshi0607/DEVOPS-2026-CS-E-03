@@ -1,13 +1,14 @@
-
 pipeline {
     agent any
 
     stages {
-
         stage('Checkout') {
             steps {
                 echo 'Using the checked-out DevOps repository'
-                bat 'git status'
+
+                bat '''
+                    git status
+                '''
             }
         }
 
@@ -16,13 +17,18 @@ pipeline {
                 dir('Quiz_Project') {
                     bat '''
                         echo Installing root dependencies...
-                        npm install
+                        call npm install
+                        if errorlevel 1 exit /b 1
 
                         echo Installing backend dependencies...
-                        npm run install:backend
+                        call npm --prefix backend install
+                        if errorlevel 1 exit /b 1
 
                         echo Installing frontend dependencies...
-                        npm run install:frontend
+                        call npm --prefix frontend install
+                        if errorlevel 1 exit /b 1
+
+                        echo All dependencies installed successfully.
                     '''
                 }
             }
@@ -31,12 +37,32 @@ pipeline {
         stage('Verify Project Structure') {
             steps {
                 bat '''
-                    if not exist "Quiz_Project\\package.json" exit /b 1
-                    if not exist "Quiz_Project\\backend\\package.json" exit /b 1
-                    if not exist "Quiz_Project\\frontend\\package.json" exit /b 1
-                    if not exist "Quiz_Project\\backend\\server.js" exit /b 1
+                    if not exist "Quiz_Project\\package.json" (
+                        echo ERROR: Root package.json not found.
+                        exit /b 1
+                    )
 
-                    echo MERN project files verified successfully.
+                    if not exist "Quiz_Project\\backend\\package.json" (
+                        echo ERROR: Backend package.json not found.
+                        exit /b 1
+                    )
+
+                    if not exist "Quiz_Project\\frontend\\package.json" (
+                        echo ERROR: Frontend package.json not found.
+                        exit /b 1
+                    )
+
+                    if not exist "Quiz_Project\\backend\\server.js" (
+                        echo ERROR: Backend server.js not found.
+                        exit /b 1
+                    )
+
+                    if not exist "Quiz_Project\\backend\\test-integration.js" (
+                        echo ERROR: Backend integration test file not found.
+                        exit /b 1
+                    )
+
+                    echo MERN project structure verified successfully.
                 '''
             }
         }
@@ -46,7 +72,8 @@ pipeline {
                 dir('Quiz_Project') {
                     bat '''
                         echo Running backend integration tests...
-                        npm test
+                        call npm test
+                        if errorlevel 1 exit /b 1
                     '''
                 }
             }
@@ -55,13 +82,13 @@ pipeline {
 
     post {
         success {
-            echo 'QUIZ PROJECT TESTS PASSED'
+            echo 'ALL BACKEND TESTS PASSED'
             echo 'JENKINS BUILD SUCCESSFUL'
         }
 
         failure {
-            echo 'QUIZ PROJECT PIPELINE FAILED'
-            echo 'Check the stage logs for details.'
+            echo 'JENKINS PIPELINE FAILED'
+            echo 'Check the Console Output for the first error.'
         }
 
         always {
