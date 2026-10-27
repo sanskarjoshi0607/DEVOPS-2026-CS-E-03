@@ -1,80 +1,71 @@
+
 pipeline {
     agent any
 
     stages {
 
+        stage('Checkout') {
+            steps {
+                echo 'Using the checked-out DevOps repository'
+                bat 'git status'
+            }
+        }
+
         stage('Install Dependencies') {
-             steps {
-        bat '''
-        echo ================================
-        echo INSTALLING NODE DEPENDENCIES
-        echo ================================
+            steps {
+                dir('Quiz_Project') {
+                    bat '''
+                        echo Installing root dependencies...
+                        npm install
 
-        npm install
-        '''
-    }
-}
-        stage('Verify Files') {
+                        echo Installing backend dependencies...
+                        npm run install:backend
+
+                        echo Installing frontend dependencies...
+                        npm run install:frontend
+                    '''
+                }
+            }
+        }
+
+        stage('Verify Project Structure') {
             steps {
                 bat '''
-                echo ================================
-                echo WORKSPACE
-                echo ================================
-                cd
+                    if not exist "Quiz_Project\\package.json" exit /b 1
+                    if not exist "Quiz_Project\\backend\\package.json" exit /b 1
+                    if not exist "Quiz_Project\\frontend\\package.json" exit /b 1
+                    if not exist "Quiz_Project\\backend\\server.js" exit /b 1
 
-                echo ================================
-                echo PROJECT FILES
-                echo ================================
-                dir
-
-                echo ================================
-                echo CHECKING REQUIRED FILES
-                echo ================================
-
-                if not exist index.html exit /b 1
-                if not exist style.css exit /b 1
-                if not exist script.js exit /b 1
-                if not exist server.js exit /b 1
-                if not exist test.js exit /b 1
-
-                echo All required files are present.
+                    echo MERN project files verified successfully.
                 '''
             }
         }
 
-
-        stage('Run Tests') {
+        stage('Run Backend Tests') {
             steps {
-                bat '''
-                echo ================================
-                echo RUNNING QUIZ APP TESTS
-                echo ================================
-
-                node test.js
-                '''
+                dir('Quiz_Project') {
+                    bat '''
+                        echo Running backend integration tests...
+                        npm test
+                    '''
+                }
             }
         }
-
     }
-     post {
 
+    post {
         success {
-            echo '================================'
-            echo 'QUIZ APP TESTS PASSED'
+            echo 'QUIZ PROJECT TESTS PASSED'
             echo 'JENKINS BUILD SUCCESSFUL'
-            echo '================================'
         }
 
         failure {
-            echo '================================'
-            echo 'QUIZ APP TESTS FAILED'
-            echo 'JENKINS BUILD FAILED'
-            echo '================================'
+            echo 'QUIZ PROJECT PIPELINE FAILED'
+            echo 'Check the stage logs for details.'
         }
 
         always {
             echo 'Jenkins Pipeline execution completed.'
         }
-
     }
 }
