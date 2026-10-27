@@ -69,19 +69,21 @@ pipeline {
 
         stage('Check Kubernetes Access') {
             steps {
-                bat '''
-                    where kubectl
-                    if errorlevel 1 exit /b 1
+                withEnv(['KUBECONFIG=C:\\ProgramData\\Jenkins\\.jenkins\\.kube\\config']) {
+                    bat '''
+                        echo Checking Kubernetes context...
+                        kubectl config current-context
+                        if errorlevel 1 exit /b 1
 
-                    kubectl config current-context
-                    if errorlevel 1 exit /b 1
+                        echo Checking Kubernetes nodes...
+                        kubectl get nodes
+                        if errorlevel 1 exit /b 1
 
-                    kubectl get nodes
-                    if errorlevel 1 exit /b 1
-
-                    kubectl get deployments
-                    if errorlevel 1 exit /b 1
-                '''
+                        echo Checking application deployments...
+                        kubectl get deployments
+                        if errorlevel 1 exit /b 1
+                    '''
+                }
             }
         }
 
@@ -117,26 +119,31 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                bat '''
-                    echo Updating backend deployment...
-                    kubectl set image deployment/backend backend=quiz-backend:latest
-                    if errorlevel 1 exit /b 1
+                withEnv(['KUBECONFIG=C:\\ProgramData\\Jenkins\\.jenkins\\.kube\\config']) {
+                    bat '''
+                        echo Updating backend deployment...
+                        kubectl set image deployment/backend backend=quiz-backend:latest
+                        if errorlevel 1 exit /b 1
 
-                    echo Updating frontend deployment...
-                    kubectl set image deployment/frontend frontend=quiz-frontend:latest
-                    if errorlevel 1 exit /b 1
+                        echo Updating frontend deployment...
+                        kubectl set image deployment/frontend frontend=quiz-frontend:latest
+                        if errorlevel 1 exit /b 1
 
-                    echo Waiting for backend rollout...
-                    kubectl rollout status deployment/backend --timeout=180s
-                    if errorlevel 1 exit /b 1
+                        echo Waiting for backend rollout...
+                        kubectl rollout status deployment/backend --timeout=180s
+                        if errorlevel 1 exit /b 1
 
-                    echo Waiting for frontend rollout...
-                    kubectl rollout status deployment/frontend --timeout=180s
-                    if errorlevel 1 exit /b 1
+                        echo Waiting for frontend rollout...
+                        kubectl rollout status deployment/frontend --timeout=180s
+                        if errorlevel 1 exit /b 1
 
-                    echo Kubernetes deployment completed successfully.
-                    kubectl get deployments
-                '''
+                        echo Kubernetes deployments:
+                        kubectl get deployments
+                        if errorlevel 1 exit /b 1
+
+                        echo Kubernetes deployment completed successfully.
+                    '''
+                }
             }
         }
     }
@@ -151,7 +158,7 @@ pipeline {
         failure {
             echo 'JENKINS PIPELINE FAILED'
             echo 'Check Console Output for the first error.'
-            echo 'The Render deployment is not modified by this pipeline.'
+            echo 'Render deployment was not modified by this pipeline.'
         }
 
         always {
