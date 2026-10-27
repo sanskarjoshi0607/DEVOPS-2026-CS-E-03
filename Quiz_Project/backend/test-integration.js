@@ -1,8 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import { initMemoryStorage } from './config/db.js';
-import quizRoutes from './routes/quizRoutes.js';
-import authRoutes from './routes/authRoutes.js';
+import quizRoutes from './models/routes/quizRoutes.js';
+import authRoutes from './models/routes/authRoutes.js';
 
 const app = express();
 app.use(cors());
