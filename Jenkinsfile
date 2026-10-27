@@ -67,6 +67,24 @@ pipeline {
             }
         }
 
+        stage('Check Kubernetes Access') {
+            steps {
+                bat '''
+                    where kubectl
+                    if errorlevel 1 exit /b 1
+
+                    kubectl config current-context
+                    if errorlevel 1 exit /b 1
+
+                    kubectl get nodes
+                    if errorlevel 1 exit /b 1
+
+                    kubectl get deployments
+                    if errorlevel 1 exit /b 1
+                '''
+            }
+        }
+
         stage('Run Backend Tests') {
             steps {
                 dir('Quiz_Project') {
@@ -78,17 +96,62 @@ pipeline {
                 }
             }
         }
+
+        stage('Build Docker Images') {
+            steps {
+                dir('Quiz_Project') {
+                    bat '''
+                        echo Building backend image...
+                        docker build -t quiz-backend:latest ./backend
+                        if errorlevel 1 exit /b 1
+
+                        echo Building frontend image...
+                        docker build --no-cache -t quiz-frontend:latest ./frontend
+                        if errorlevel 1 exit /b 1
+
+                        echo Docker images built successfully.
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                bat '''
+                    echo Updating backend deployment...
+                    kubectl set image deployment/backend backend=quiz-backend:latest
+                    if errorlevel 1 exit /b 1
+
+                    echo Updating frontend deployment...
+                    kubectl set image deployment/frontend frontend=quiz-frontend:latest
+                    if errorlevel 1 exit /b 1
+
+                    echo Waiting for backend rollout...
+                    kubectl rollout status deployment/backend --timeout=180s
+                    if errorlevel 1 exit /b 1
+
+                    echo Waiting for frontend rollout...
+                    kubectl rollout status deployment/frontend --timeout=180s
+                    if errorlevel 1 exit /b 1
+
+                    echo Kubernetes deployment completed successfully.
+                    kubectl get deployments
+                '''
+            }
+        }
     }
 
     post {
         success {
             echo 'ALL BACKEND TESTS PASSED'
-            echo 'JENKINS BUILD SUCCESSFUL'
+            echo 'DOCKER IMAGES BUILT SUCCESSFULLY'
+            echo 'KUBERNETES DEPLOYMENT SUCCESSFUL'
         }
 
         failure {
             echo 'JENKINS PIPELINE FAILED'
-            echo 'Check the Console Output for the first error.'
+            echo 'Check Console Output for the first error.'
+            echo 'The Render deployment is not modified by this pipeline.'
         }
 
         always {
