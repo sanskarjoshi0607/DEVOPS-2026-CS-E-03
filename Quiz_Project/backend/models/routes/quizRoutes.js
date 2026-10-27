@@ -7,7 +7,7 @@ import {
   deleteQuiz,
   getSubmissions,
   getStatus
-} from '../controllers/quizController.js';
+} from '../../controllers/quizController.js';
 import { protect, optionalAuth } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
