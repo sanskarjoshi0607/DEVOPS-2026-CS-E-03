@@ -8,7 +8,7 @@ import {
   getSubmissions,
   getStatus
 } from '../../controllers/quizController.js';
-import { protect, optionalAuth } from '../middleware/authMiddleware.js';
+import { protect, optionalAuth } from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
