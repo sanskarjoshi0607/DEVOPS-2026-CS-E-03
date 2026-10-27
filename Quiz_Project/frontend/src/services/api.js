@@ -3,7 +3,8 @@
  * Includes authentication token handling and role-based request authorization.
  */
 
-const API_BASE_URL = 'https://quizportal-backend-dbn6.onrender.com/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || '/api';
 // Token Storage Helpers
 export function getAuthToken() {
   return localStorage.getItem('quiz_auth_token');
