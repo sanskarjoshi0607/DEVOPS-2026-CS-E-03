@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import client from 'prom-client';
 import { connectDB, initMemoryStorage } from './config/db.js';
 import quizRoutes from './models/routes/quizRoutes.js';
 import authRoutes from './models/routes/authRoutes.js';
@@ -9,6 +10,43 @@ import authRoutes from './models/routes/authRoutes.js';
 dotenv.config();
 
 const app = express();
+const register = new client.Registry();
+
+client.collectDefaultMetrics({ register });
+
+const httpRequestDuration = new client.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Duration of HTTP requests in seconds',
+  labelNames: ['method', 'route', 'status_code'],
+  registers: [register],
+  buckets: [0.1, 0.3, 0.5, 1, 2, 5]
+});
+
+app.use((req, res, next) => {
+  const start = process.hrtime();
+
+  res.on('finish', () => {
+    const duration = process.hrtime(start);
+    const seconds = duration[0] + duration[1] / 1e9;
+
+    httpRequestDuration.observe(
+      {
+        method: req.method,
+        route: req.route?.path || req.path,
+        status_code: res.statusCode
+      },
+      seconds
+    );
+  });
+
+  next();
+});
+
+// Metrics endpoint for Prometheus
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
 const PORT = process.env.PORT || 5000;
 
 // Enable Cross-Origin Resource Sharing for frontend requests
