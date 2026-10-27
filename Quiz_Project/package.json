@@ -1,0 +1,22 @@
+{
+  "name": "quiz-portal-root",
+  "version": "1.0.0",
+  "description": "Full-stack Beginner-Friendly Quiz Portal using React, Express, and MongoDB",
+  "scripts": {
+    "install:backend": "npm --prefix backend install",
+    "install:frontend": "npm --prefix frontend install",
+    "install:server": "npm --prefix backend install",
+    "install:client": "npm --prefix frontend install",
+    "install:all": "npm install && npm run install:backend && npm run install:frontend",
+    "backend": "npm --prefix backend run dev",
+    "frontend": "npm --prefix frontend run dev",
+    "server": "npm --prefix backend run dev",
+    "client": "npm --prefix frontend run dev",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "seed": "npm --prefix backend run seed",
+    "test": "npm --prefix backend test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
